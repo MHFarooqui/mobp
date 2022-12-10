@@ -8,11 +8,8 @@ router.post('/api/authenticate', async (req, res) => {
         email: req.body.email,
         password: req.body.password
     };
-    // get user from db, if any user with given email & password exist
-    const response = await dbHelper.executeQuery({ text: `SELECT * from Users where Email = $1 AND Password = $2`, values: [loginInfo.email, loginInfo.password] });
-    const user = response.rows[0];
-    // if found user then generate token for that user
-    if (!!user) {
+    const user = await dbHelper.findByEmail(loginInfo.email);
+    if (!!user && user.password == loginInfo.password) {
         const token = jwtHelper.generateJwtToken(user);
         res.json({ token });
     }
